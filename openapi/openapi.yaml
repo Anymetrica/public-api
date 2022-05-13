@@ -1,0 +1,30 @@
+openapi: 3.0.3
+info:
+  title: API Gateway
+  description: API Gateway
+  version: 0.0.1
+servers:
+  - url: 'http://localhost:8080'
+paths:
+  /iam/v1/login/:
+    $ref: paths/iam@v1@login@.yaml
+  /iam/v1/login/refresh/:
+    $ref: paths/iam@v1@login@refresh@.yaml
+  /inventory/v1/servers/:
+    $ref: paths/inventory@v1@servers@.yaml
+  '/inventory/v1/servers/{sid}/':
+    $ref: 'paths/inventory@v1@servers@{sid}@.yaml'
+  '/inventory/v1/servers/{sid}/config/':
+    $ref: 'paths/inventory@v1@servers@{sid}@config@.yaml'
+  '/inventory/v1/servers/{sid}/config/reset/':
+    $ref: 'paths/inventory@v1@servers@{sid}@config@reset@.yaml'
+  /inventory/v1/streams/:
+    $ref: paths/inventory@v1@streams@.yaml
+  '/inventory/v1/streams/{streamId}/':
+    $ref: 'paths/inventory@v1@streams@{streamId}@.yaml'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

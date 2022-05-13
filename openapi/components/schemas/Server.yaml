@@ -1,0 +1,68 @@
+type: object
+required:
+  - sid
+  - name
+  - node_id
+  - online
+  - state
+properties:
+  sid:
+    type: integer
+    description: Server ID
+    format: uint64
+    example: 1337
+  name:
+    type: string
+    description: Server name
+    example: WAREHOUSE-32
+  mac:
+    type: string
+    format: mac
+    description: MAC address
+  node_id:
+    type: string
+    description: ID of node that server connected to
+    example: 624ffa060e3f203e5f76cea3
+  online:
+    type: boolean
+    description: online/offline status
+  device:
+    $ref: ./Device.yaml
+  state:
+    type: string
+    enum:
+      - created
+      - pending_link
+      - active
+      - suspended
+      - error
+    description: Current server state
+  capabilities:
+    type: object
+    properties:
+      version:
+        type: string
+        description: Software version
+        example: v0.1.0-beta
+      api_version:
+        type: string
+        description: API version
+        example: v1
+      audio_codecs:
+        type: array
+        items:
+          type: string
+          example:
+            - flac
+            - alac
+      video_codecs:
+        type: array
+        items:
+          type: string
+          example:
+            - h264
+            - h265
+      networks:
+        type: array
+        items:
+          $ref: ./Network.yaml

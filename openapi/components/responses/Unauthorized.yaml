@@ -1,0 +1,8 @@
+description: Operation is not allowed for this user
+content:
+  application/json:
+    example:
+      code: 404
+      description: Unauthorized
+    schema:
+      $ref: ../schemas/GenericError.yaml

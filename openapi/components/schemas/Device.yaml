@@ -1,0 +1,12 @@
+type: object
+properties:
+  vendor:
+    type: string
+    description: Vendor Name
+    example: Anymetrica
+  sn:
+    type: string
+    description: Serial number
+  model:
+    type: string
+    description: Device model

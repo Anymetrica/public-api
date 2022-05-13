@@ -1,0 +1,48 @@
+type: object
+required:
+  - id
+  - sid
+  - name
+  - online
+  - device
+properties:
+  id:
+    type: string
+    format: uuid
+    description: Stream ID
+  sid:
+    type: integer
+    example: 123456
+    description: ServerID
+  name:
+    type: string
+    example: Warehouse-2 Entrance
+    description: Stream Name
+  online:
+    type: boolean
+  device:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        example: 1
+        description: ID of the device in scope of server
+      manufacturer:
+        type: string
+        example: Cameras Inc.
+      model:
+        type: string
+  profiles:
+    type: object
+    additionalProperties:
+      type: object
+      properties:
+        url:
+          type: string
+          description: video URL
+          example: 'http://example.com/video/hls/list.m3u8'
+        preview:
+          type: string
+          description: Preview image URL

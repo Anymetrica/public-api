@@ -1,0 +1,68 @@
+get:
+  operationId: GetStreamByID
+  summary: Get stream by ID
+  tags:
+    - streams
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: streamId
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      $ref: ../components/responses/Stream.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    '500':
+      $ref: ../components/responses/InternalServerError.yaml
+put:
+  operationId: UpdateStream
+  summary: Update stream info
+  tags:
+    - streams
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: streamId
+      required: true
+      schema:
+        type: string
+  requestBody:
+    $ref: ../components/requestBodies/NewStream.yaml
+  responses:
+    '200':
+      description: OK
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    '500':
+      $ref: ../components/responses/InternalServerError.yaml
+delete:
+  operationId: DeleteStream
+  summary: Remove stream from server
+  tags:
+    - streams
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: streamId
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: OK
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    '500':
+      $ref: ../components/responses/InternalServerError.yaml

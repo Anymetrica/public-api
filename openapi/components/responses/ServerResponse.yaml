@@ -1,0 +1,5 @@
+description: Server instance
+content:
+  application/json:
+    schema:
+      $ref: ../schemas/Server.yaml

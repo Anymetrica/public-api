@@ -1,0 +1,5 @@
+description: Stream info
+content:
+  application/json:
+    schema:
+      $ref: ../schemas/Stream.yaml

@@ -1,0 +1,12 @@
+description: Stream ID
+content:
+  application/json:
+    schema:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Stream ID

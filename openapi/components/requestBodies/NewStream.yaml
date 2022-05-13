@@ -1,0 +1,23 @@
+required: true
+content:
+  application/json:
+    schema:
+      type: object
+      required:
+        - sid
+        - name
+        - url
+      properties:
+        sid:
+          type: integer
+          example: 123456
+          description: Server ID
+        name:
+          type: string
+        url:
+          type: string
+          example: 'rtsp://video.com/video.sdp'
+        model:
+          type: string
+        manufacturer:
+          type: string

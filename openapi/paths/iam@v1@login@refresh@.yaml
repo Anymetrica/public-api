@@ -1,0 +1,28 @@
+post:
+  operationId: RefreshToken
+  tags:
+    - iam
+  summary: Refresh auth token
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - refresh_token
+          properties:
+            refresh_token:
+              type: string
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              access_token:
+                type: string
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml

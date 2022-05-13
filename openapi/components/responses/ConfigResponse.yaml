@@ -1,0 +1,5 @@
+description: Server configuration
+content:
+  application/json:
+    schema:
+      $ref: ../schemas/ServerConfig.yaml

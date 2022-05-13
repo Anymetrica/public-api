@@ -1,0 +1,50 @@
+get:
+  operationId: GetServerConfig
+  tags:
+    - servers
+  summary: Get server configuration
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: sid
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      $ref: ../components/responses/ConfigResponse.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    '500':
+      $ref: ../components/responses/InternalServerError.yaml
+put:
+  operationId: UpdateServerConfig
+  tags:
+    - servers
+  summary: Update server configuration
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: path
+      name: sid
+      required: true
+      schema:
+        type: integer
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/ServerConfig.yaml
+  responses:
+    '200':
+      description: OK
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    '500':
+      $ref: ../components/responses/InternalServerError.yaml

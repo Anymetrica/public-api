@@ -1,0 +1,84 @@
+type: object
+properties:
+  storage:
+    type: object
+    properties:
+      events:
+        type: object
+        properties:
+          min_images_interval_ms:
+            type: integer
+            example: 200
+          disks:
+            type: array
+            items:
+              type: object
+              properties:
+                path:
+                  type: string
+                  example: /opt/anymetrica-platform/events
+                max_size:
+                  type: integer
+                  example: 4096
+      video:
+        type: object
+        properties:
+          continuous:
+            type: boolean
+          path:
+            type: string
+            example: /opt/anymetrica-platform/videos
+          size_limit:
+            type: integer
+            example: 2048
+          cleanup_size:
+            type: integer
+            example: 4096
+          units:
+            type: string
+            enum:
+              - b
+              - kb
+              - mb
+              - gb
+              - tb
+  logs:
+    type: object
+    properties:
+      file:
+        type: string
+        example: /var/log/anymetrica-platform/vs.log
+      size:
+        type: integer
+        example: 1024
+      stdout:
+        type: boolean
+      syslog:
+        type: boolean
+  network:
+    type: object
+    properties:
+      local:
+        type: object
+        properties:
+          port:
+            type: integer
+            example: 4221
+          enable:
+            type: boolean
+      node:
+        type: object
+        properties:
+          host:
+            type: string
+            format: ipv4
+          port:
+            type: integer
+            example: 4222
+      proxy:
+        type: object
+        properties:
+          url:
+            type: string
+          enable:
+            type: boolean
