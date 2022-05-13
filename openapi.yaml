@@ -1,0 +1,761 @@
+openapi: 3.0.3
+info:
+  title: API Gateway
+  description: API Gateway
+  version: 0.0.1
+servers:
+  - url: 'http://localhost:8080'
+paths:
+  /iam/v1/login/:
+    post:
+      operationId: Login
+      tags: ['iam']
+      summary: User log in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ['email', 'password']
+              properties:
+                email:
+                  type: string
+                  description: User email
+                password:
+                  type: string
+                  description: User password
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+        401:
+          $ref: '#/components/responses/Unauthorized'
+          
+  /iam/v1/login/refresh/:
+    post:
+      operationId: RefreshToken
+      tags: ['iam']
+      summary: Refresh auth token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ['refresh_token']
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /inventory/v1/servers/:
+    get:
+      operationId: GetServers
+      tags:
+        - servers
+      summary: Get list of servers
+      security:
+        - bearerAuth: []
+      parameters:
+      - in: query
+        name: node_id
+        schema:
+          type: string
+      - in: query
+        name: online
+        schema:
+          type: boolean
+        
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  servers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Server'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+                    
+    post:
+      operationId: CreateServer
+      tags:
+      - servers
+      summary: Create new Server
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateServerRequest'
+      
+      responses:
+        201:
+          $ref: '#/components/responses/ServerResponse'
+        403:
+          $ref: '#/components/responses/Forbidden'
+          
+  /inventory/v1/servers/{sid}/:
+    get:
+      operationId: GetServerByID
+      tags:
+      - servers
+      summary: Get server by SID
+      security:
+        - bearerAuth: []
+      parameters:
+      - in: path
+        name: sid
+        required: true
+        schema:
+          type: integer
+      
+      responses:
+        200:
+          $ref: '#/components/responses/ServerResponse'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+          
+  
+    put:
+      operationId: UpdateServer
+      tags:
+      - servers
+      summary: Update server
+      security:
+        - bearerAuth: []
+      parameters:
+      - in: path
+        name: sid
+        required: true
+        schema:
+          type: integer
+        
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Server'
+      responses:
+        200:
+          $ref: '#/components/responses/ServerResponse'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+              
+    delete:
+      operationId: DeleteServer
+      tags:
+      - servers
+      summary: Delete server
+      security:
+        - bearerAuth: []
+      parameters:
+      - in: path
+        name: sid
+        required: true
+        schema:
+          type: integer
+      
+      responses:
+        200:
+          description: OK
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      
+  /inventory/v1/servers/{sid}/config/:
+    get:
+      operationId: GetServerConfig
+      tags:
+      - servers
+      summary: Get server configuration
+      security:
+        - bearerAuth: []
+      parameters:
+      - in: path
+        name: sid
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          $ref: '#/components/responses/ConfigResponse'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+          
+    put:
+      operationId: UpdateServerConfig
+      tags:
+        - servers
+      summary: Update server configuration
+      security:
+        - bearerAuth: []
+      parameters:
+      - in: path
+        name: sid
+        required: true
+        schema:
+          type: integer
+        
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServerConfig'
+        
+      responses:
+        200:
+          description: OK
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+          
+  /inventory/v1/servers/{sid}/config/reset/:
+    put:
+      operationId: ResetServerConfig
+      tags:
+        - servers
+      summary: Reset server configuration to default state
+      security:
+        - bearerAuth: []
+      parameters:
+      - in: path
+        name: sid
+        required: true
+        schema:
+          type: integer
+      
+      responses:
+        200:
+          description: OK
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+          
+          
+  /inventory/v1/streams/:
+    get:
+      operationId: GetStreams
+      summary: Get list of streams
+      tags: ['streams']
+      security:
+        - bearerAuth: []
+      parameters:
+      - in: query
+        name: sid
+        description: Server ID
+        schema:
+          type: integer
+          
+      responses:
+        200:
+          $ref: '#/components/responses/StreamList'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+          
+    post:
+      operationId: CreateStream
+      summary: Add stream to server
+      tags: ['streams']
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/NewStream'
+      responses:
+        200:
+          $ref: '#/components/responses/NewStream'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+          
+  /inventory/v1/streams/{streamId}/:
+    get:
+      operationId: GetStreamByID
+      summary: Get stream by ID
+      tags: ['streams']
+      security:
+        - bearerAuth: []
+      parameters:
+      - in: path
+        name: streamId
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          $ref: '#/components/responses/Stream'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+          
+    put:
+      operationId: UpdateStream
+      summary: Update stream info
+      tags: ['streams']
+      security:
+        - bearerAuth: []
+      parameters:
+      - in: path
+        name: streamId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        $ref: '#/components/requestBodies/NewStream'
+      responses:
+        200:
+          description: OK
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+          
+    delete:
+      operationId: DeleteStream
+      summary: Remove stream from server
+      tags: ['streams']
+      security:
+        - bearerAuth: []
+      parameters:
+      - in: path
+        name: streamId
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+              
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CreateServerRequest:
+      type: object
+      required:
+      - name
+      - mac
+      properties:
+        sid:
+          type: integer
+          format: int64
+          example: 123456
+        password:
+          type: string
+          example: somepassword123
+          description: Password to authenticate. If empty, password will be set during linkage
+        name:
+          type: string
+          example: My Server
+          description: Server name
+        mac:
+          type: string
+          description: MAC-address
+  
+    Server:
+      type: object
+      required:
+        - sid
+        - name
+        - node_id
+        - online
+        - state
+      properties:
+        sid:
+          type: integer
+          description: Server ID
+          format: uint64
+          example: 1337
+        name:
+          type: string
+          description: Server name
+          example: "WAREHOUSE-32"
+        mac:
+          type: string
+          format: mac
+          description: MAC address
+        node_id:
+          type: string
+          description: ID of node that server connected to
+          example: "624ffa060e3f203e5f76cea3"
+        online:
+          type: boolean
+          description: online/offline status
+        device:
+          $ref: '#/components/schemas/Device'
+        state:
+          type: string
+          enum: ['created', 'pending_link', 'active', 'suspended', 'error']
+          description: Current server state
+        capabilities:
+          type: object
+          properties:
+            version:
+              type: string
+              description: Software version
+              example: v0.1.0-beta
+            api_version:
+              type: string
+              description: API version
+              example: v1
+            audio_codecs:
+              type: array
+              items:
+                type: string
+                example: ['flac', 'alac']
+            video_codecs:
+              type: array
+              items:
+                type: string
+                example: ['h264', 'h265']
+            networks:
+              type: array
+              items:
+                $ref: '#/components/schemas/Network'
+                
+    ServerConfig:
+      type: object
+      properties:
+        storage:
+          type: object
+          properties:
+            events:
+              type: object
+              properties:
+                min_images_interval_ms:
+                  type: integer
+                  example: 200
+                disks:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      path:
+                        type: string
+                        example: /opt/anymetrica-platform/events
+                      max_size:
+                        type: integer
+                        example: 4096
+                        
+            video:
+              type: object
+              properties:
+                continuous:
+                  type: boolean
+                path:
+                  type: string
+                  example: /opt/anymetrica-platform/videos
+                size_limit:
+                  type: integer
+                  example: 2048
+                cleanup_size:
+                  type: integer
+                  example: 4096
+                units:
+                  type: string
+                  enum: ['b', 'kb', 'mb', 'gb', 'tb']
+                  
+        logs:
+          type: object
+          properties:
+            file:
+              type: string
+              example: '/var/log/anymetrica-platform/vs.log'
+            size:
+              type: integer
+              example: 1024
+            stdout:
+              type: boolean
+            syslog:
+              type: boolean
+        
+        network:
+          type: object
+          properties:
+            local:
+              type: object
+              properties:
+                port:
+                  type: integer
+                  example: 4221
+                enable:
+                  type: boolean
+            node:
+              type: object
+              properties:
+                host:
+                  type: string
+                  format: ipv4
+                port:
+                  type: integer
+                  example: 4222
+            
+            proxy:
+              type: object
+              properties:
+                url:
+                  type: string
+                enable:
+                  type: boolean
+
+    Stream:
+      type: object
+      required: ['id', 'sid', 'name', 'online', 'device']
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Stream ID
+        sid:
+          type: integer
+          example: 123456
+          description: ServerID
+        name:
+          type: string
+          example: "Warehouse-2 Entrance"
+          description: Stream Name
+        online:
+          type: boolean
+        device:
+          type: object
+          required: ['id']
+          properties:
+            id:
+              type: integer
+              example: 1
+              description: ID of the device in scope of server
+            manufacturer:
+              type: string
+              example: "Cameras Inc."
+            model:
+              type: string
+        profiles:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              url:
+                type: string
+                description: video URL
+                example: http://example.com/video/hls/list.m3u8
+              preview:
+                type: string
+                description: Preview image URL
+          
+    GenericError:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 500
+        message:
+          type: string
+          example: "Something bad happened"
+    
+    Device:
+      type: object
+      properties:
+        vendor:
+          type: string
+          description: Vendor Name
+          example: Anymetrica
+        sn:
+          type: string
+          description: Serial number
+        model:
+          type: string
+          description: Device model
+          
+    Network:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Network interface name
+          example: eth0
+        cidr:
+          type: string
+          description: Network CIDR
+          example: "10.8.0.0/24"
+  
+  responses:
+    ServerResponse:
+      description: Server instance
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Server'
+            
+    ConfigResponse:
+      description: Server configuration
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServerConfig'
+            
+    StreamList:
+      description: List of streams
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              streams:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stream'
+                  
+    Stream:
+      description: Stream info
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Stream'
+                  
+    NewStream:
+      description: Stream ID
+      content:
+        application/json:
+          schema:
+            type: object
+            required: ['id']
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Stream ID
+            
+  
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          example: {
+            code: 500,
+            description: "Something happened"
+          }
+          schema:
+            $ref: '#/components/schemas/GenericError'
+            
+    Unauthorized:
+      description: Operation is not allowed for this user
+      content:
+        application/json:
+          example: {
+            code: 404,
+            description: "Unauthorized"
+          }
+          schema:
+            $ref: '#/components/schemas/GenericError'
+    
+    Forbidden:
+      description: Operation is not allowed for this user
+      content:
+        application/json:
+          example: {
+            code: 403,
+            description: "User is not allowed to perform this operation"
+          }
+          schema:
+            $ref: '#/components/schemas/GenericError'
+    
+    NotFound:
+      description: Entity not found
+      content:
+        application/json:
+          example: {
+            code: 404,
+            description: "Requested resource not found"
+          }
+          schema:
+            $ref: '#/components/schemas/GenericError'
+            
+  requestBodies:
+    NewStream:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: ['sid', 'name', 'url']
+            properties:
+              sid:
+                type: integer
+                example: 123456
+                description: Server ID
+              name:
+                type: string
+              url:
+                type: string
+                example: rtsp://video.com/video.sdp
+              model:
+                type: string
+              manufacturer:
+                type: string
+              

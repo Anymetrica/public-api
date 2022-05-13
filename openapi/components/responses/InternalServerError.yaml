@@ -1,8 +1,0 @@
-description: Internal server error
-content:
-  application/json:
-    example:
-      code: 500
-      description: Something happened
-    schema:
-      $ref: ../schemas/GenericError.yaml

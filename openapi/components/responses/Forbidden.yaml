@@ -1,8 +1,0 @@
-description: Operation is not allowed for this user
-content:
-  application/json:
-    example:
-      code: 403
-      description: User is not allowed to perform this operation
-    schema:
-      $ref: ../schemas/GenericError.yaml

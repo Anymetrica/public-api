@@ -1,8 +1,0 @@
-description: Entity not found
-content:
-  application/json:
-    example:
-      code: 404
-      description: Requested resource not found
-    schema:
-      $ref: ../schemas/GenericError.yaml
