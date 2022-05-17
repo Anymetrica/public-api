@@ -618,95 +618,122 @@ components:
       required: ['storage', 'logs', 'network']
       properties:
         storage:
-          type: object
-          required: ['events', 'video']
-          properties:
-            events:
-              type: object
-              required: ['min_images_interval_ms', 'disks']
-              properties:
-                min_images_interval_ms:
-                  type: integer
-                  example: 200
-                disks:
-                  type: array
-                  items:
-                    type: object
-                    required: ['path', 'max_size']
-                    properties:
-                      path:
-                        type: string
-                        example: /opt/anymetrica-platform/events
-                      max_size:
-                        type: integer
-                        example: 4096
-                        
-            video:
-              type: object
-              required: ['continuous', 'path', 'size_limit', 'cleanup_size', 'units']
-              properties:
-                continuous:
-                  type: boolean
-                path:
-                  type: string
-                  example: /opt/anymetrica-platform/videos
-                size_limit:
-                  type: integer
-                  example: 2048
-                cleanup_size:
-                  type: integer
-                  example: 4096
-                units:
-                  type: string
-                  enum: ['b', 'kb', 'mb', 'gb', 'tb']
+          $ref: '#/components/schemas/ConfigStorage'
                   
         logs:
-          type: object
-          required: ['file', 'size', 'stdout', 'syslog']
-          properties:
-            file:
-              type: string
-              example: '/var/log/anymetrica-platform/vs.log'
-            size:
-              type: integer
-              example: 1024
-            stdout:
-              type: boolean
-            syslog:
-              type: boolean
+          $ref: '#/components/schemas/ConfigLogs'
         
         network:
-          type: object
-          required: ['local', 'node', 'proxy']
-          properties:
-            local:
-              type: object
-              required: ['port', 'enable']
-              properties:
-                port:
-                  type: integer
-                  example: 4221
-                enable:
-                  type: boolean
-            node:
-              type: object
-              required: ['host', 'port']
-              properties:
-                host:
-                  type: string
-                  format: ipv4
-                port:
-                  type: integer
-                  example: 4222
+          $ref: '#/components/schemas/ConfigNetwork'
+    
+    ConfigLogs:
+      type: object
+      required: ['file', 'size', 'stdout', 'syslog']
+      properties:
+        file:
+          type: string
+          example: '/var/log/anymetrica-platform/vs.log'
+        size:
+          type: integer
+          example: 1024
+        stdout:
+          type: boolean
+        syslog:
+          type: boolean
+          
+    ConfigStorage:
+      type: object
+      required: ['events', 'video']
+      properties:
+        events:
+          $ref: '#/components/schemas/ConfigEventStorage'
+                    
+        video:
+          $ref: '#/components/schemas/ConfigVideoStorage'
+          
+    ConfigEventStorage:
+      type: object
+      required: ['min_images_interval_ms', 'disks']
+      properties:
+        min_images_interval_ms:
+          type: integer
+          example: 200
+        disks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigDisk'
             
-            proxy:
-              type: object
-              required: ['url', 'enable']
-              properties:
-                url:
-                  type: string
-                enable:
-                  type: boolean
+    ConfigDisk:
+      type: object
+      required: ['path', 'max_size']
+      properties:
+        path:
+          type: string
+          example: /opt/anymetrica-platform/events
+        max_size:
+          type: integer
+          example: 4096
+          
+    ConfigVideoStorage:
+      type: object
+      required: ['continuous', 'path', 'size_limit', 'cleanup_size', 'units']
+      properties:
+        continuous:
+          type: boolean
+        path:
+          type: string
+          example: /opt/anymetrica-platform/videos
+        size_limit:
+          type: integer
+          example: 2048
+        cleanup_size:
+          type: integer
+          example: 4096
+        units:
+          type: string
+          enum: ['b', 'kb', 'mb', 'gb', 'tb']
+          
+    ConfigNetwork:
+      type: object
+      required: ['local', 'node', 'proxy']
+      properties:
+        local:
+          $ref: '#/components/schemas/ConfigNetworkLocal'
+        node:
+          $ref: '#/components/schemas/ConfigNetworkNode'
+        
+        proxy:
+          $ref: '#/components/schemas/ConfigNetworkProxy'
+    
+    ConfigNetworkLocal:
+      type: object
+      required: ['port', 'enable']
+      properties:
+        port:
+          type: integer
+          example: 4221
+        enable:
+          type: boolean
+          
+    ConfigNetworkNode:
+      type: object
+      required: ['host', 'port']
+      properties:
+        host:
+          type: string
+          format: ipv4
+        port:
+          type: integer
+          example: 4222
+          
+    ConfigNetworkProxy:
+      type: object
+      required: ['url', 'enable']
+      properties:
+        url:
+          type: string
+        enable:
+          type: boolean
 
     Stream:
       type: object
