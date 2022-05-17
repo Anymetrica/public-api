@@ -498,9 +498,11 @@ components:
   schemas:
     Assignment:
       type: object
+      required: ['subject', 'object', 'action']
       properties:
         subject:
           type: object
+          required: ['id', 'kind']
           properties:
             id:
               anyOf:
@@ -511,6 +513,7 @@ components:
               enum: ['user']
         object:
           type: object
+          required: ['id', 'kind']
           properties:
             id:
               anyOf:
@@ -525,7 +528,7 @@ components:
           
     Node:
       type: object
-      required: ['name']
+      required: ['id', 'name', 'created_at', 'updated_at']
       properties:
         id:
           type: string
@@ -534,6 +537,8 @@ components:
           type: string
           description: Name of the node
           example: eu-central-1
+          x-oapi-codegen-extra-tags:
+            validate: "required"
         description:
           type: string
         created_at:
@@ -548,9 +553,12 @@ components:
       required:
         - sid
         - name
+        - mac
         - node_id
         - online
         - state
+        - device
+        - capabilities
       properties:
         sid:
           type: integer
@@ -580,6 +588,7 @@ components:
           description: Current server state
         capabilities:
           type: object
+          required: ['version', 'api_version', 'audio_codecs', 'video_codecs', 'networks']
           properties:
             version:
               type: string
@@ -606,12 +615,15 @@ components:
                 
     ServerConfig:
       type: object
+      required: ['storage', 'logs', 'network']
       properties:
         storage:
           type: object
+          required: ['events', 'video']
           properties:
             events:
               type: object
+              required: ['min_images_interval_ms', 'disks']
               properties:
                 min_images_interval_ms:
                   type: integer
@@ -620,6 +632,7 @@ components:
                   type: array
                   items:
                     type: object
+                    required: ['path', 'max_size']
                     properties:
                       path:
                         type: string
@@ -630,6 +643,7 @@ components:
                         
             video:
               type: object
+              required: ['continuous', 'path', 'size_limit', 'cleanup_size', 'units']
               properties:
                 continuous:
                   type: boolean
@@ -648,6 +662,7 @@ components:
                   
         logs:
           type: object
+          required: ['file', 'size', 'stdout', 'syslog']
           properties:
             file:
               type: string
@@ -662,9 +677,11 @@ components:
         
         network:
           type: object
+          required: ['local', 'node', 'proxy']
           properties:
             local:
               type: object
+              required: ['port', 'enable']
               properties:
                 port:
                   type: integer
@@ -673,6 +690,7 @@ components:
                   type: boolean
             node:
               type: object
+              required: ['host', 'port']
               properties:
                 host:
                   type: string
@@ -683,6 +701,7 @@ components:
             
             proxy:
               type: object
+              required: ['url', 'enable']
               properties:
                 url:
                   type: string
@@ -691,7 +710,7 @@ components:
 
     Stream:
       type: object
-      required: ['id', 'sid', 'name', 'online', 'device']
+      required: ['id', 'sid', 'name', 'online', 'device', 'profiles']
       properties:
         id:
           type: string
@@ -709,7 +728,7 @@ components:
           type: boolean
         device:
           type: object
-          required: ['id']
+          required: ['id', 'model', 'manufacturer']
           properties:
             id:
               type: integer
@@ -746,6 +765,7 @@ components:
     
     Device:
       type: object
+      required: ['properties', 'vendor', 'sn']
       properties:
         vendor:
           type: string
@@ -760,6 +780,7 @@ components:
           
     Network:
       type: object
+      required: ['name', 'cidr']
       properties:
         name:
           type: string
@@ -882,9 +903,13 @@ components:
                 type: string
                 description: Name of the node
                 example: eu-central-1
+                x-oapi-codegen-extra-tags:
+                  validate: "required"
               password:
                 type: string
                 format: password
+                x-oapi-codegen-extra-tags:
+                  validate: "required"
               description:
                 type: string
                 
@@ -910,9 +935,13 @@ components:
                 type: string
                 example: My Server
                 description: Server name
+                x-oapi-codegen-extra-tags:
+                  validate: "required"
               mac:
                 type: string
                 description: MAC-address
+                x-oapi-codegen-extra-tags:
+                  validate: "required,mac"
   
     NewStream:
       required: true
@@ -928,9 +957,13 @@ components:
                 description: Server ID
               name:
                 type: string
+                x-oapi-codegen-extra-tags:
+                  validate: "required"
               url:
                 type: string
                 example: rtsp://video.com/video.sdp
+                x-oapi-codegen-extra-tags:
+                  validate: "required,url"
               model:
                 type: string
               manufacturer:
