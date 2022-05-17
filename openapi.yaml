@@ -67,6 +67,112 @@ paths:
                     type: string
         401:
           $ref: '#/components/responses/Unauthorized'
+          
+  /iam/v1/assignments/:
+    post:
+      operationId: AddAssignments
+      tags: ['iam']
+      summary: Add new assignments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assignments:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Assignment'
+      responses:
+        200:
+          description: OK
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+          
+  /inventory/v1/nodes/:
+    get:
+      operationId: GetNodes
+      tags: ['nodes']
+      summary: Get list of nodes
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nodes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Node'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: CreateNode
+      tags: ['nodes']
+      summary: Create new node
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/CreateNode'
+      responses:
+        200:
+          $ref: '#/components/responses/Node'
+          
+  /inventory/v1/nodes/{nodeId}/:
+      get:
+        operationId: GetNodeByID
+        tags: ['nodes']
+        summary: Get Node by its ID
+        security:
+        - bearerAuth: []
+        parameters:
+        - in: path
+          required: true
+          name: nodeId
+          schema:
+            type: string
+            example: "5da454f4307b0a8b3083883b"
+        responses:
+          200:
+            $ref: '#/components/responses/Node'
+          403:
+            $ref: '#/components/responses/Forbidden'
+          404:
+            $ref: '#/components/responses/NotFound'
+          500:
+            $ref: '#/components/responses/InternalServerError'
+      
+      delete:
+        operationId: DeleteNode
+        tags: ['nodes']
+        summary: Delete Node by its ID
+        security:
+        - bearerAuth: []
+        parameters:
+        - in: path
+          required: true
+          name: nodeId
+          schema:
+            type: string
+            example: "5da454f4307b0a8b3083883b"
+        responses:
+          200:
+            description: OK
+          403:
+            $ref: '#/components/responses/Forbidden'
+          404:
+            $ref: '#/components/responses/NotFound'
+          500:
+            $ref: '#/components/responses/InternalServerError'
 
   /inventory/v1/servers/:
     get:
@@ -109,11 +215,7 @@ paths:
       security:
         - bearerAuth: []
       requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateServerRequest'
+        $ref: '#/components/requestBodies/CreateServer'
       
       responses:
         201:
@@ -179,8 +281,7 @@ paths:
               
     delete:
       operationId: DeleteServer
-      tags:
-      - servers
+      tags: ['servers']
       summary: Delete server
       security:
         - bearerAuth: []
@@ -386,7 +487,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
-              
 
 components:
   securitySchemes:
@@ -396,27 +496,52 @@ components:
       bearerFormat: JWT
 
   schemas:
-    CreateServerRequest:
+    Assignment:
       type: object
-      required:
-      - name
-      - mac
       properties:
-        sid:
-          type: integer
-          format: int64
-          example: 123456
-        password:
+        subject:
+          type: object
+          properties:
+            id:
+              anyOf:
+              - type: string
+              - type: integer
+            kind:
+              type: string
+              enum: ['user']
+        object:
+          type: object
+          properties:
+            id:
+              anyOf:
+              - type: string
+              - type: integer
+            kind:
+              type: string
+              enum: ['server', 'stream', 'node', 'plugin']
+        action:
           type: string
-          example: somepassword123
-          description: Password to authenticate. If empty, password will be set during linkage
+          enum: ['create', 'get', 'update', 'delete', 'execute']
+          
+    Node:
+      type: object
+      required: ['name']
+      properties:
+        id:
+          type: string
+          example: "5da454f4307b0a8b3083883b"
         name:
           type: string
-          example: My Server
-          description: Server name
-        mac:
+          description: Name of the node
+          example: eu-central-1
+        description:
           type: string
-          description: MAC-address
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
   
     Server:
       type: object
@@ -671,6 +796,13 @@ components:
                 items:
                   $ref: '#/components/schemas/Stream'
                   
+    Node:
+      description: Node info
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Node'
+                  
     Stream:
       description: Stream info
       content:
@@ -737,6 +869,50 @@ components:
             $ref: '#/components/schemas/GenericError'
             
   requestBodies:
+    CreateNode:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: ['name', 'password']
+            properties:
+              name:
+                type: string
+                description: Name of the node
+                example: eu-central-1
+              password:
+                type: string
+                format: password
+              description:
+                type: string
+                
+    CreateServer:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - name
+            - mac
+            properties:
+              sid:
+                type: integer
+                format: int64
+                example: 123456
+              password:
+                type: string
+                example: somepassword123
+                description: Password to authenticate. If empty, password will be set during linkage
+              name:
+                type: string
+                example: My Server
+                description: Server name
+              mac:
+                type: string
+                description: MAC-address
+  
     NewStream:
       required: true
       content:
