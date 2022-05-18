@@ -556,6 +556,8 @@ components:
         - mac
         - node_id
         - online
+        - created_at
+        - updated_at
         - state
         - device
         - capabilities
@@ -580,6 +582,12 @@ components:
         online:
           type: boolean
           description: online/offline status
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
         device:
           $ref: '#/components/schemas/Device'
         state:
@@ -737,7 +745,7 @@ components:
 
     Stream:
       type: object
-      required: ['id', 'sid', 'name', 'online', 'device', 'profiles']
+      required: ['id', 'sid', 'name', 'online', 'device', 'profiles', 'created_at', 'updated_at']
       properties:
         id:
           type: string
@@ -753,6 +761,12 @@ components:
           description: Stream Name
         online:
           type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
         device:
           type: object
           required: ['id', 'model', 'manufacturer']
