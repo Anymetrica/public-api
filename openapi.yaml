@@ -749,7 +749,6 @@ components:
       properties:
         id:
           type: string
-          format: uuid
           description: Stream ID
         sid:
           type: integer
