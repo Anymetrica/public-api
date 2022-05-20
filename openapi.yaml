@@ -191,6 +191,14 @@ paths:
         name: online
         schema:
           type: boolean
+      - in: query
+        name: sid
+        schema:
+          type: integer
+      - in: query
+        name: name
+        schema:
+          type: string
         
       responses:
         200:
