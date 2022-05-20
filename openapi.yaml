@@ -805,7 +805,7 @@ components:
     
     Device:
       type: object
-      required: ['properties', 'vendor', 'sn']
+      required: ['model', 'vendor', 'sn']
       properties:
         vendor:
           type: string
