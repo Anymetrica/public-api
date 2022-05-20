@@ -194,7 +194,9 @@ paths:
       - in: query
         name: sid
         schema:
-          type: integer
+          type: string
+          description: Comma-separated list of ServerIDs
+          example: "123,345"
       - in: query
         name: name
         schema:
