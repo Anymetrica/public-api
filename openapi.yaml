@@ -423,7 +423,7 @@ paths:
         $ref: '#/components/requestBodies/NewStream'
       responses:
         200:
-          $ref: '#/components/responses/NewStream'
+          $ref: '#/components/responses/StreamID'
         403:
           $ref: '#/components/responses/Forbidden'
         500:
@@ -883,7 +883,7 @@ components:
           schema:
             $ref: '#/components/schemas/Stream'
                   
-    NewStream:
+    StreamID:
       description: Stream ID
       content:
         application/json:
@@ -893,7 +893,6 @@ components:
             properties:
               id:
                 type: string
-                format: uuid
                 description: Stream ID
             
   
