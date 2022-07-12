@@ -67,6 +67,112 @@ paths:
                     type: string
         401:
           $ref: '#/components/responses/Unauthorized'
+          
+  /iam/v1/assignments/:
+    post:
+      operationId: AddAssignments
+      tags: ['iam']
+      summary: Add new assignments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assignments:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Assignment'
+      responses:
+        200:
+          description: OK
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+          
+  /inventory/v1/nodes/:
+    get:
+      operationId: GetNodes
+      tags: ['nodes']
+      summary: Get list of nodes
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nodes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Node'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: CreateNode
+      tags: ['nodes']
+      summary: Create new node
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/CreateNode'
+      responses:
+        200:
+          $ref: '#/components/responses/Node'
+          
+  /inventory/v1/nodes/{nodeId}/:
+      get:
+        operationId: GetNodeByID
+        tags: ['nodes']
+        summary: Get Node by its ID
+        security:
+        - bearerAuth: []
+        parameters:
+        - in: path
+          required: true
+          name: nodeId
+          schema:
+            type: string
+            example: "5da454f4307b0a8b3083883b"
+        responses:
+          200:
+            $ref: '#/components/responses/Node'
+          403:
+            $ref: '#/components/responses/Forbidden'
+          404:
+            $ref: '#/components/responses/NotFound'
+          500:
+            $ref: '#/components/responses/InternalServerError'
+      
+      delete:
+        operationId: DeleteNode
+        tags: ['nodes']
+        summary: Delete Node by its ID
+        security:
+        - bearerAuth: []
+        parameters:
+        - in: path
+          required: true
+          name: nodeId
+          schema:
+            type: string
+            example: "5da454f4307b0a8b3083883b"
+        responses:
+          200:
+            description: OK
+          403:
+            $ref: '#/components/responses/Forbidden'
+          404:
+            $ref: '#/components/responses/NotFound'
+          500:
+            $ref: '#/components/responses/InternalServerError'
 
   /inventory/v1/servers/:
     get:
@@ -85,6 +191,16 @@ paths:
         name: online
         schema:
           type: boolean
+      - in: query
+        name: sid
+        schema:
+          type: string
+          description: Comma-separated list of ServerIDs
+          example: "123,345"
+      - in: query
+        name: name
+        schema:
+          type: string
         
       responses:
         200:
@@ -109,11 +225,7 @@ paths:
       security:
         - bearerAuth: []
       requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateServerRequest'
+        $ref: '#/components/requestBodies/CreateServer'
       
       responses:
         201:
@@ -179,8 +291,7 @@ paths:
               
     delete:
       operationId: DeleteServer
-      tags:
-      - servers
+      tags: ['servers']
       summary: Delete server
       security:
         - bearerAuth: []
@@ -312,7 +423,7 @@ paths:
         $ref: '#/components/requestBodies/NewStream'
       responses:
         200:
-          $ref: '#/components/responses/NewStream'
+          $ref: '#/components/responses/StreamID'
         403:
           $ref: '#/components/responses/Forbidden'
         500:
@@ -386,7 +497,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
-              
 
 components:
   securitySchemes:
@@ -396,36 +506,71 @@ components:
       bearerFormat: JWT
 
   schemas:
-    CreateServerRequest:
+    Assignment:
       type: object
-      required:
-      - name
-      - mac
+      required: ['subject', 'object', 'action']
       properties:
-        sid:
-          type: integer
-          format: int64
-          example: 123456
-        password:
+        subject:
+          type: object
+          required: ['id', 'kind']
+          properties:
+            id:
+              anyOf:
+              - type: string
+              - type: integer
+            kind:
+              type: string
+              enum: ['user']
+        object:
+          type: object
+          required: ['id', 'kind']
+          properties:
+            id:
+              anyOf:
+              - type: string
+              - type: integer
+            kind:
+              type: string
+              enum: ['server', 'stream', 'node', 'plugin']
+        action:
           type: string
-          example: somepassword123
-          description: Password to authenticate. If empty, password will be set during linkage
+          enum: ['create', 'get', 'update', 'delete', 'execute']
+          
+    Node:
+      type: object
+      required: ['id', 'name', 'created_at', 'updated_at']
+      properties:
+        id:
+          type: string
+          example: "5da454f4307b0a8b3083883b"
         name:
           type: string
-          example: My Server
-          description: Server name
-        mac:
+          description: Name of the node
+          example: eu-central-1
+          x-oapi-codegen-extra-tags:
+            validate: "required"
+        description:
           type: string
-          description: MAC-address
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
   
     Server:
       type: object
       required:
         - sid
         - name
+        - mac
         - node_id
         - online
+        - created_at
+        - updated_at
         - state
+        - device
+        - capabilities
       properties:
         sid:
           type: integer
@@ -447,6 +592,12 @@ components:
         online:
           type: boolean
           description: online/offline status
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
         device:
           $ref: '#/components/schemas/Device'
         state:
@@ -455,6 +606,7 @@ components:
           description: Current server state
         capabilities:
           type: object
+          required: ['version', 'api_version', 'audio_codecs', 'video_codecs', 'networks']
           properties:
             version:
               type: string
@@ -481,96 +633,132 @@ components:
                 
     ServerConfig:
       type: object
+      required: ['storage', 'logs', 'network']
       properties:
         storage:
-          type: object
-          properties:
-            events:
-              type: object
-              properties:
-                min_images_interval_ms:
-                  type: integer
-                  example: 200
-                disks:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      path:
-                        type: string
-                        example: /opt/anymetrica-platform/events
-                      max_size:
-                        type: integer
-                        example: 4096
-                        
-            video:
-              type: object
-              properties:
-                continuous:
-                  type: boolean
-                path:
-                  type: string
-                  example: /opt/anymetrica-platform/videos
-                size_limit:
-                  type: integer
-                  example: 2048
-                cleanup_size:
-                  type: integer
-                  example: 4096
-                units:
-                  type: string
-                  enum: ['b', 'kb', 'mb', 'gb', 'tb']
+          $ref: '#/components/schemas/ConfigStorage'
                   
         logs:
-          type: object
-          properties:
-            file:
-              type: string
-              example: '/var/log/anymetrica-platform/vs.log'
-            size:
-              type: integer
-              example: 1024
-            stdout:
-              type: boolean
-            syslog:
-              type: boolean
+          $ref: '#/components/schemas/ConfigLogs'
         
         network:
-          type: object
-          properties:
-            local:
-              type: object
-              properties:
-                port:
-                  type: integer
-                  example: 4221
-                enable:
-                  type: boolean
-            node:
-              type: object
-              properties:
-                host:
-                  type: string
-                  format: ipv4
-                port:
-                  type: integer
-                  example: 4222
+          $ref: '#/components/schemas/ConfigNetwork'
+    
+    ConfigLogs:
+      type: object
+      required: ['file', 'size', 'stdout', 'syslog']
+      properties:
+        file:
+          type: string
+          example: '/var/log/anymetrica-platform/vs.log'
+        size:
+          type: integer
+          example: 1024
+        stdout:
+          type: boolean
+        syslog:
+          type: boolean
+          
+    ConfigStorage:
+      type: object
+      required: ['events', 'video']
+      properties:
+        events:
+          $ref: '#/components/schemas/ConfigEventStorage'
+                    
+        video:
+          $ref: '#/components/schemas/ConfigVideoStorage'
+          
+    ConfigEventStorage:
+      type: object
+      required: ['min_images_interval_ms', 'disks']
+      properties:
+        min_images_interval_ms:
+          type: integer
+          example: 200
+        disks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigDisk'
             
-            proxy:
-              type: object
-              properties:
-                url:
-                  type: string
-                enable:
-                  type: boolean
+    ConfigDisk:
+      type: object
+      required: ['path', 'max_size']
+      properties:
+        path:
+          type: string
+          example: /opt/anymetrica-platform/events
+        max_size:
+          type: integer
+          example: 4096
+          
+    ConfigVideoStorage:
+      type: object
+      required: ['continuous', 'path', 'size_limit', 'cleanup_size', 'units']
+      properties:
+        continuous:
+          type: boolean
+        path:
+          type: string
+          example: /opt/anymetrica-platform/videos
+        size_limit:
+          type: integer
+          example: 2048
+        cleanup_size:
+          type: integer
+          example: 4096
+        units:
+          type: string
+          enum: ['b', 'kb', 'mb', 'gb', 'tb']
+          
+    ConfigNetwork:
+      type: object
+      required: ['local', 'node', 'proxy']
+      properties:
+        local:
+          $ref: '#/components/schemas/ConfigNetworkLocal'
+        node:
+          $ref: '#/components/schemas/ConfigNetworkNode'
+        
+        proxy:
+          $ref: '#/components/schemas/ConfigNetworkProxy'
+    
+    ConfigNetworkLocal:
+      type: object
+      required: ['port', 'enable']
+      properties:
+        port:
+          type: integer
+          example: 4221
+        enable:
+          type: boolean
+          
+    ConfigNetworkNode:
+      type: object
+      required: ['host', 'port']
+      properties:
+        host:
+          type: string
+          format: ipv4
+        port:
+          type: integer
+          example: 4222
+          
+    ConfigNetworkProxy:
+      type: object
+      required: ['url', 'enable']
+      properties:
+        url:
+          type: string
+        enable:
+          type: boolean
 
     Stream:
       type: object
-      required: ['id', 'sid', 'name', 'online', 'device']
+      required: ['id', 'sid', 'name', 'online', 'device', 'profiles', 'created_at', 'updated_at']
       properties:
         id:
           type: string
-          format: uuid
           description: Stream ID
         sid:
           type: integer
@@ -582,9 +770,15 @@ components:
           description: Stream Name
         online:
           type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
         device:
           type: object
-          required: ['id']
+          required: ['id', 'model', 'manufacturer']
           properties:
             id:
               type: integer
@@ -605,11 +799,12 @@ components:
                 description: video URL
                 example: http://example.com/video/hls/list.m3u8
               preview:
-                type: string
-                description: Preview image URL
+                type: boolean
+                description: Preview image
           
     GenericError:
       type: object
+      required: ['code', 'message']
       properties:
         code:
           type: integer
@@ -620,6 +815,7 @@ components:
     
     Device:
       type: object
+      required: ['model', 'vendor', 'sn']
       properties:
         vendor:
           type: string
@@ -634,6 +830,7 @@ components:
           
     Network:
       type: object
+      required: ['name', 'cidr']
       properties:
         name:
           type: string
@@ -665,11 +862,19 @@ components:
         application/json:
           schema:
             type: object
+            required: ['streams']
             properties:
               streams:
                 type: array
                 items:
                   $ref: '#/components/schemas/Stream'
+                  
+    Node:
+      description: Node info
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Node'
                   
     Stream:
       description: Stream info
@@ -678,7 +883,7 @@ components:
           schema:
             $ref: '#/components/schemas/Stream'
                   
-    NewStream:
+    StreamID:
       description: Stream ID
       content:
         application/json:
@@ -688,7 +893,6 @@ components:
             properties:
               id:
                 type: string
-                format: uuid
                 description: Stream ID
             
   
@@ -737,6 +941,58 @@ components:
             $ref: '#/components/schemas/GenericError'
             
   requestBodies:
+    CreateNode:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: ['name', 'password']
+            properties:
+              name:
+                type: string
+                description: Name of the node
+                example: eu-central-1
+                x-oapi-codegen-extra-tags:
+                  validate: "required"
+              password:
+                type: string
+                format: password
+                x-oapi-codegen-extra-tags:
+                  validate: "required"
+              description:
+                type: string
+                
+    CreateServer:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - name
+            - mac
+            properties:
+              sid:
+                type: integer
+                format: int64
+                example: 123456
+              password:
+                type: string
+                example: somepassword123
+                description: Password to authenticate. If empty, password will be set during linkage
+              name:
+                type: string
+                example: My Server
+                description: Server name
+                x-oapi-codegen-extra-tags:
+                  validate: "required"
+              mac:
+                type: string
+                description: MAC-address
+                x-oapi-codegen-extra-tags:
+                  validate: "required,mac"
+  
     NewStream:
       required: true
       content:
@@ -751,9 +1007,13 @@ components:
                 description: Server ID
               name:
                 type: string
+                x-oapi-codegen-extra-tags:
+                  validate: "required"
               url:
                 type: string
                 example: rtsp://video.com/video.sdp
+                x-oapi-codegen-extra-tags:
+                  validate: "required,url"
               model:
                 type: string
               manufacturer:
